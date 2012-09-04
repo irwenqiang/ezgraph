@@ -26,11 +26,14 @@ public class Example {
 		System.out.print("Computing SimRank on a Subgraph...");
 		SimRank simrank = new SimRank(graph2);
 		System.out.println(" done.");
-//		System.out.print("Computing a Graph Clustering...");
-//		GraphClustering clustering = new GraphClustering(graph);
-//		System.out.println(" done.");
+		System.out.print("Computing a Graph Clustering...");
+		ChineseWhispersClustering clustering = new ChineseWhispersClustering(graph);
+		System.out.println(" done.");
 		System.out.print("Computing Graph Statistics Through Sampling...");
 		SamplingStatistics sstats = new SamplingStatistics(graph,5000);
+		System.out.println(" done.");
+		System.out.println("Computing Connected Components...");
+		StronglyConnectedComponents components = new StronglyConnectedComponents(graph);
 		System.out.println(" done.");
 
 		System.out.println("Computing Degree Statistics...");
@@ -48,6 +51,10 @@ public class Example {
 		System.out.println("Max Degree = " + stats.maxDegree());
 		System.out.println("Avg Degree = " + stats.avgDegree());
 
+		System.out.println("Number of Nodes = " + graph.numNodes());
+		System.out.println("Number of Arcs = " + graph.numArcs());
+		System.out.println("Number of Clusters = " + clustering.numberOfClusters());
+		System.out.println("Number of Strongly Connected Components = " + components.numberOfComponents());
 		System.out.println("Clustering Coefficient = " + sstats.clusteringCoefficient());
 		System.out.println("Avg Neighbours = " + sstats.avgNumNeighbors());
 		System.out.println("Avg Triangles = " + sstats.avgNumTriangles());
@@ -69,8 +76,8 @@ public class Example {
 			System.out.println( graph2.node(n1) + "\t" + graph2.node(n2) + "\t" + simrank.getSimRankScore(n1,n2));
 		}
 
-//		System.out.println("Graph Clusters");
-//		for ( int i=0; i<graph.numNodes(); i++) System.out.println(graph.node(i) + "\t" + clustering.getCluster(i));
+		System.out.println("Graph Clusters for the 10 first nodes");
+		for ( int i=0; i<graph.numNodes() && i < 10; i++) System.out.println(graph.node(i) + "\t" + clustering.getCluster(i));
 
 		System.out.println("Top 10 Nodes on Subgraph Sorted By PageRank");
 		for ( String node : pagerank2.getSortedNodes().subList(0,Math.min(10,graph2.numNodes()))) System.out.println(node + "\t" + pagerank2.getPageRankScore(node));
