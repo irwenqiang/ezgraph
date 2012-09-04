@@ -1,31 +1,73 @@
 package ezgraph;
 
 import java.util.*;
+import es.yrbcn.graph.weighted.*;
+import it.unimi.dsi.webgraph.*;
+import it.unimi.dsi.webgraph.labelling.*;
+import java.util.*;
+import java.util.zip.*;
+import java.io.*;
+import java.lang.reflect.*;
+import it.unimi.dsi.fastutil.ints.*;
+import it.unimi.dsi.fastutil.objects.*;
+import it.unimi.dsi.logging.ProgressLogger;
 
-public class DelaunayGraph {
+public class DelaunayGraph extends UndirectedGraph {
 
-/*    public static void main (String[] args) {
-        Simplex tri = new Simplex(new Pnt[] {new Pnt(-10,10), new Pnt(10,10), new Pnt(0,-10)});
-        System.out.println("Triangle created: " + tri);
-        DelaunayTriangulation dt = new DelaunayTriangulation(tri);
-        System.out.println("DelaunayTriangulation created: " + dt);
-        dt.delaunayPlace(new Pnt(0,0));
-        dt.delaunayPlace(new Pnt(1,0));
-        dt.delaunayPlace(new Pnt(0,1));
-        System.out.println("After adding 3 points, the DelaunayTriangulation is a " + dt);
-        System.out.println("Neighbor data for " + this);
-        for (Iterator it = neighbors.keySet().iterator(); it.hasNext();) {
-            Simplex simplex = (Simplex) it.next();
-            Simplex.moreInfo = true;
-            System.out.print("    " + simplex + ":");
-            Simplex.moreInfo = false;
-            for (Iterator otherIt = ((Set) neighbors.get(simplex)).iterator(); 
-                 otherIt.hasNext();)
-                System.out.print(" " + otherIt.next());
-            System.out.println();
-        }
-        Simplex.moreInfo = remember;
-    } */
+    public DelaunayGraph ( String file ) throws IOException {
+        Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
+        for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
+	Set<WeightedArc> list = new HashSet<WeightedArc>();
+        Simplex triangle = new Simplex(new Pnt[] {new Pnt(-180.0,-90.0), new Pnt(-180, 90 + 180), new Pnt(180 + 360,-90)});
+        neighbors = new HashMap();
+        neighbors.put(triangle, new HashSet());
+        mostRecent = triangle;
+	BufferedReader br;
+	try { 
+		br = new BufferedReader(new InputStreamReader( new GZIPInputStream( new FileInputStream(file) ))); 
+	} catch ( Exception ex ) { 
+		br = new BufferedReader(new FileReader(file));
+	}
+	String aux = null;
+	while ( ( aux = br.readLine() ) != null ) try {
+		String parts[] = aux.split("\t");
+		Double l1 = new Double(parts[0]);
+		Double l2 = new Double(parts[1]);
+	       	delaunayPlace(new Pnt(l1,l2));
+	} catch ( Exception ex ) { throw new Error(ex); }
+	br.close();
+	String l1, l2;
+	Float weight = new Float((float)1.0);
+        for (Iterator it = neighbors.keySet().iterator(); it.hasNext();) try {
+            Simplex simplex = (Simplex)it.next();
+	    List vertices = simplex.vertices;
+	    double p1[] = ((Pnt)(vertices.get(0))).coordinates;
+	    double p2[] = ((Pnt)(vertices.get(0))).coordinates;
+	    double p3[] = ((Pnt)(vertices.get(0))).coordinates;
+            l1 = new String(p1[0]+";"+p1[1]);
+	    l2 = new String(p2[0]+";"+p2[1]);
+	    if ( !nodesReverse.containsKey(l1) ) { nodesReverse.put(l1, nodesReverse.size()); nodes.put(nodes.size(), l1); }
+	    if ( !nodesReverse.containsKey(l2) ) { nodesReverse.put(l2, nodesReverse.size()); nodes.put(nodes.size(), l2); }
+	    list.add((WeightedArc)cons[0].newInstance(nodesReverse.get(l1),nodesReverse.get(l2),weight));
+	    list.add((WeightedArc)cons[0].newInstance(nodesReverse.get(l2),nodesReverse.get(l1),weight));
+            l1 = new String(p2[0]+";"+p2[1]);
+	    l2 = new String(p3[0]+";"+p3[1]);
+	    if ( !nodesReverse.containsKey(l1) ) { nodesReverse.put(l1, nodesReverse.size()); nodes.put(nodes.size(), l1); }
+	    if ( !nodesReverse.containsKey(l2) ) { nodesReverse.put(l2, nodesReverse.size()); nodes.put(nodes.size(), l2); }
+	    list.add((WeightedArc)cons[0].newInstance(nodesReverse.get(l1),nodesReverse.get(l2),weight));
+	    list.add((WeightedArc)cons[0].newInstance(nodesReverse.get(l2),nodesReverse.get(l1),weight));
+            l1 = new String(p3[0]+";"+p3[1]);
+	    l2 = new String(p1[0]+";"+p1[1]);
+	    if ( !nodesReverse.containsKey(l1) ) { nodesReverse.put(l1, nodesReverse.size()); nodes.put(nodes.size(), l1); }
+	    if ( !nodesReverse.containsKey(l2) ) { nodesReverse.put(l2, nodesReverse.size()); nodes.put(nodes.size(), l2); }
+	    list.add((WeightedArc)cons[0].newInstance(nodesReverse.get(l1),nodesReverse.get(l2),weight));
+	    list.add((WeightedArc)cons[0].newInstance(nodesReverse.get(l2),nodesReverse.get(l1),weight));
+	} catch ( Exception ex ) { throw new Error(ex); }
+	this.graph = new WeightedBVGraph( list.toArray( new WeightedArc[0] ) );
+	this.reverse = graph;
+	numArcs = list.size();
+	iterator = nodeIterator();
+    }
 
     private Simplex mostRecent = null;
 
@@ -33,12 +75,6 @@ public class DelaunayGraph {
 
     private HashMap neighbors;
     
-    public DelaunayGraph (Simplex triangle) {
-        neighbors = new HashMap();
-        neighbors.put(triangle, new HashSet());
-        mostRecent = triangle;
-    }
-        
     private int size () {
         return neighbors.size();
     }
@@ -156,7 +192,7 @@ public class DelaunayGraph {
 
 class Pnt {
     
-    private double[] coordinates;
+    public double[] coordinates;
     
     public Pnt (double[] coords) {
         coordinates = new double[coords.length];
@@ -386,14 +422,12 @@ class Pnt {
 
 class Simplex extends AbstractSet implements Set {
     
-    private List vertices;
+    public List vertices;
 
     private long idNumber;
 
     private static long idGenerator = 0;
 
-    public static boolean moreInfo = false;
-    
     public Simplex (Collection collection) {
         this.vertices = Collections.unmodifiableList(new ArrayList(collection));
         this.idNumber = idGenerator++;
@@ -404,13 +438,8 @@ class Simplex extends AbstractSet implements Set {
     
     public Simplex (Object[] vertices) {
         this(Arrays.asList(vertices));
-    }
-    
-    public String toString () {
-        if (!moreInfo) return "Simplex" + idNumber;
-        return "Simplex" + idNumber + super.toString();
-    }
-    
+    }   
+   
     public int dimension () {
         return this.vertices.size() - 1;
     }
@@ -460,6 +489,5 @@ class Simplex extends AbstractSet implements Set {
     public boolean equals (Object o) {
         return (this == o);
     }
+
 }
-
-

@@ -59,13 +59,14 @@ public class Graph extends ArcLabelledImmutableGraph {
 		String l2 = new String(parts[1]);
 		if ( parts.length == 3 ) weight = new Float(parts[2]);
 		list.add((WeightedArc)cons[0].newInstance(nodesReverse.get(l2),nodesReverse.get(l1),weight));
-		numArcs++;
 	} catch ( Exception ex ) { throw new Error(ex); }
 	br.close();
 	this.reverse = new WeightedBVGraph( list.toArray( new WeightedArc[0] ) );
 	numArcs = list.size();
 	iterator = nodeIterator();
   }
+
+  public Graph ( ) { this( new WeightedArc[]{} ); }
 
   public Graph ( WeightedArc[] arcs ) { this( new WeightedBVGraph( arcs ) ); }
 
@@ -349,20 +350,34 @@ public class Graph extends ArcLabelledImmutableGraph {
   }
 
   public Graph neighbourhoodGraph ( int nnodes[] , int hops ) {
+	int numIterators = 100;
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	Set<WeightedArc> list1 = new HashSet<WeightedArc>();
 	Int2IntAVLTreeMap map = new Int2IntAVLTreeMap();
 	IntSet set = new IntLinkedOpenHashSet();
 	for ( int n : nnodes ) map.put(n,0);
-	NodeIterator it = nodeIterator();
+	NodeIterator its[] = new NodeIterator[numIterators];
+	int  itNum[] = new int[numIterators];
+	for ( int n = 0; n < its.length; n++ ) { its[n] = nodeIterator(); itNum[n] = 0; }
         Int2ObjectMap<String> nodes = new Int2ObjectOpenHashMap<String>();
         Object2IntMap<String> nodesReverse = new Object2IntOpenHashMap<String>();
 	while ( map.size() != 0 ) {
-		Integer node = map.firstKey();
-		Integer aux1 = null;
-		while ( ( aux1 = it.nextInt() ) != null && aux1 >= 0 && aux1 < node ) { }
-		if ( aux1 == null || aux1 > node ) { it = nodeIterator(); continue; }
+		Integer node = 0;
+		for ( int n = 0; n < its.length; n++ ) if ( itNum[n] <= node ) node = itNum[n];
+		node = map.tailMap(node).firstKey();
+		if ( node == null ) map.firstKey();
+		NodeIterator it = null;
+		Integer aux1 = 0;
+		int iit = 0;
+		for ( int n = 0; n < its.length; n++ ) {
+			if ( !its[n].hasNext() ) { its[n] = nodeIterator(); itNum[n] = 0; }
+			if ( itNum[n] == node ) { it = its[n]; aux1 = itNum[n]; iit = 0;  break; }
+			if ( itNum[n] < node && itNum[n] >= aux1 ) { it = its[n]; aux1 = itNum[n]; iit = n; }
+		}
+		if ( it == null ) { its[0] = nodeIterator(); itNum[0] = 0; it = its[0]; }
+		while ( it != null && ( aux1 = it.nextInt() ) != null && aux1 >= 0 && aux1 < node ) { }
+		itNum[iit] = aux1 + 1;
 		Integer aux2 = null;
 		ArcLabelledNodeIterator.LabelledArcIterator suc = it.successors();
 		while ( (aux2 = suc.nextInt()) != null && aux2 >= 0 && ( aux2 < graph.numNodes() ) ) try {
