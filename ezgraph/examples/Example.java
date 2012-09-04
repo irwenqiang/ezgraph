@@ -12,7 +12,7 @@ public class Example {
 		Graph graph = new Graph(file);
 		System.out.println(" done.");
 		System.out.print("Computing a subgraph...");
-		Graph graph2 = graph.neighbourhoodGraph(new int[]{1,2},3);
+		Graph graph2 = graph.neighbourhoodGraph(new int[]{1,2},2);
 		System.out.println(" done.");
 		System.out.print("Computing PageRank...");
 		PageRank pagerank = new PageRank(graph);
@@ -54,26 +54,26 @@ public class Example {
 		System.out.println("Avg Distance = " + sstats.avgDistance());
 
 		System.out.println("Top 10 Nodes Sorted By PageRank");
-		for ( String node : pagerank.getSortedNodes().subList(0,10)) System.out.println(node + "\t" + pagerank.getPageRank(node));
+		for ( String node : pagerank.getSortedNodes().subList(0,Math.min(10,graph.numNodes()))) System.out.println(node + "\t" + pagerank.getPageRankScore(node));
 
 		System.out.println("Top 10 Nodes Sorted By HITS Hub Score");
-		for ( String node : hits.getSortedHubNodes().subList(0,10)) System.out.println(node + "\t" + hits.getHubScore(node));
+		for ( String node : hits.getSortedHubNodes().subList(0,Math.min(10,graph.numNodes()))) System.out.println(node + "\t" + hits.getHubScore(node));
 
 		System.out.println("Top 10 Nodes Sorted By HITS Authority Score");
-		for ( String node : hits.getSortedAuthorityNodes().subList(0,10)) System.out.println(node + "\t" + hits.getAuthorityScore(node));
+		for ( String node : hits.getSortedAuthorityNodes().subList(0,Math.min(10,graph.numNodes()))) System.out.println(node + "\t" + hits.getAuthorityScore(node));
 
 		System.out.println("SimRank similarity for 100 random nodes");
 		for ( int i=0; i<100; i++) {
 			int n1 = new Random().nextInt(graph2.numNodes());
 			int n2 = new Random().nextInt(graph2.numNodes());
-			System.out.println( graph2.node(n1) + "\t" + graph2.node(n2) + "\t" + simrank.getSimRank(n1,n2));
+			System.out.println( graph2.node(n1) + "\t" + graph2.node(n2) + "\t" + simrank.getSimRankScore(n1,n2));
 		}
 
 //		System.out.println("Graph Clusters");
 //		for ( int i=0; i<graph.numNodes(); i++) System.out.println(graph.node(i) + "\t" + clustering.getCluster(i));
 
 		System.out.println("Top 10 Nodes on Subgraph Sorted By PageRank");
-		for ( String node : pagerank2.getSortedNodes().subList(0,10)) System.out.println(node + "\t" + pagerank2.getPageRank(node));
+		for ( String node : pagerank2.getSortedNodes().subList(0,Math.min(10,graph2.numNodes()))) System.out.println(node + "\t" + pagerank2.getPageRankScore(node));
 	}
 
 }

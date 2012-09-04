@@ -28,7 +28,7 @@ public class PageRankOnSubGraph {
 			totalTime += Math.abs(time2 - time1);
 			if ( i+1 == numExperiments ) {
 			  System.out.println("Top 10 Nodes on Subgraph Sorted By PageRank");
-			  for ( String node : pagerank2.getSortedNodes().subList(0,10)) System.out.println(node + "\t" + pagerank2.getPageRank(node));
+			  for ( String node : pagerank2.getSortedNodes().subList(0,Math.min(10,graph2.numNodes()))) System.out.println(node + "\t" + pagerank2.getPageRankScore(node));
 			}
 		}
 		System.out.println("Average duration for each experiment : " + (long)( totalTime / numExperiments ) );

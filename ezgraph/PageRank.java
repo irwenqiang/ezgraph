@@ -34,9 +34,13 @@ public class PageRank {
 	}
 
 
-	public double getPageRank ( int node ) { return scores.get(node); }
+	public double getPageRankScore ( int node ) { return scores.get(node); }
 
-	public double getPageRank ( String node ) { int id = graph.node(node); return scores.get(id); }
+	public double getPageRankScore ( String node ) { int id = graph.node(node); return scores.get(id); }
+
+	public double[] getPageRankScores ( int node[] ) { double scores[] = new double[node.length]; for ( int i = 0; i < node.length; i++ ) scores[i] = this.scores.get(node[i]); return scores; }
+
+	public double[] getPageRankScores ( String node[] ) { double scores[] = new double[node.length]; for ( int i = 0; i < node.length; i++ ) scores[i] = this.scores.get(graph.node(node[i])); return scores; }
 
 	public List<String> getSortedNodes (  ) { 
 		List<String> list = new ArrayList<String>();

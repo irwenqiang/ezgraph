@@ -75,6 +75,14 @@ public class HITS {
 
 	public double getAuthorityScore ( String node ) { int id = graph.node(node); return authorityScores.get(id); }
 
+	public double[] getHubScores ( int node[] ) { double scores[] = new double[node.length]; for ( int i = 0; i < node.length; i++ ) scores[i] = hubScores.get(node[i]); return scores; }
+
+	public double[] getHubScores ( String node[] ) { double scores[] = new double[node.length]; for ( int i = 0; i < node.length; i++ ) scores[i] = hubScores.get(graph.node(node[i])); return scores; }
+
+	public double[] getAuthorityScores ( int node[] ) { double scores[] = new double[node.length]; for ( int i = 0; i < node.length; i++ ) scores[i] = authorityScores.get(node[i]); return scores; }
+
+	public double[] getAuthorityScores ( String node[] ) { double scores[] = new double[node.length]; for ( int i = 0; i < node.length; i++ ) scores[i] = authorityScores.get(graph.node(node[i])); return scores; }
+
 	public List<String> getSortedHubNodes (  ) { 
 		List<String> list = new ArrayList<String>();
   		Iterator<Integer> iterator = hubScores.keySet().iterator();

@@ -36,9 +36,19 @@ public class SimRank {
 					double quantity = 0.0;
 					Integer aux1 = null , aux2 = null;
 					ArcLabelledNodeIterator.LabelledArcIterator anc1 = it1.ancestors();
+					double sum1 = 0.0;
+					while ( (aux1 = anc1.nextInt()) != null && aux1 >= 0 && aux1 < ( graph.numNodes() ) ) sum1 += anc1.label().getFloat();
+					anc1 = it1.ancestors();
 					while ( (aux1 = anc1.nextInt()) != null && aux1 >= 0 && aux1 < ( graph.numNodes() ) ) {
+						double weight1 = anc1.label().getFloat() / sum1;
 						ArcLabelledNodeIterator.LabelledArcIterator anc2 = it2.ancestors();
-						while ( (aux2 = anc2.nextInt()) != null && aux2 >= 0 && aux2 < ( graph.numNodes() ) ) quantity += simrank.get(aux1,aux2);
+						double sum2 = 0.0;
+						while ( (aux2 = anc2.nextInt()) != null && aux2 >= 0 && aux2 < ( graph.numNodes() ) ) sum2 += anc2.label().getFloat();
+						anc2 = it2.ancestors();
+						while ( (aux2 = anc2.nextInt()) != null && aux2 >= 0 && aux2 < ( graph.numNodes() ) ) {
+							double weight2 = anc2.label().getFloat() / sum2;
+							quantity += weight1 * weight2 * simrank.get(aux1,aux2);
+						}
 					}
 					if ( quantity != 0.0 ) {
 						simrank2.set(currentVertex1,currentVertex2, quantity * ( DEFAULT_C / ( 1.0 * it1.indegree() * it2.indegree() )));
@@ -52,9 +62,9 @@ public class SimRank {
 		} 
  	}
 
-	public double getSimRank ( int node1, int node2 ) { return simrank.get(node1,node2); }
+	public double getSimRankScore ( int node1, int node2 ) { return simrank.get(node1,node2); }
 
-	public double getSimRank ( String node1, String node2 ) { 
+	public double getSimRankScore ( String node1, String node2 ) { 
 		int id1 = graph.node(node1), id2 = graph.node(node2); 
 		return simrank.get(id1,id2); 
 	}
