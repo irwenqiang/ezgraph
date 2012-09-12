@@ -10,14 +10,15 @@ import java.lang.reflect.*;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.*;
 import it.unimi.dsi.logging.ProgressLogger;
+import jdbm.*;
 
 public class Graph extends ArcLabelledImmutableGraph {
 
   protected ezgraph.NodeIterator iterator;
 
-  protected Int2ObjectMap<String> nodes;
+  protected PrimaryHashMap<Integer,String> nodes;
 
-  protected Object2IntMap<String> nodesReverse;
+  protected PrimaryHashMap<String,Integer> nodesReverse;
 
   protected ArcLabelledImmutableGraph graph;
   
@@ -26,11 +27,18 @@ public class Graph extends ArcLabelledImmutableGraph {
   protected int numArcs;
 
   public Graph ( String file ) throws IOException {
+	try {
+		File auxFile = File.createTempFile("graph-maps-" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+        	RecordManager recMan = RecordManagerFactory.createRecordManager(auxFile.getAbsolutePath());
+		nodes = recMan.hashMap("nodes");
+		nodesReverse = recMan.hashMap("nodesReverse");
+	} catch ( IOException ex ) { throw new Error(ex); }
+	nodes.clear();
+	nodesReverse.clear();
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	numArcs = 0;
-	nodes = new Int2ObjectOpenHashMap<String>();
-	nodesReverse = new Object2IntOpenHashMap<String>();
 	String aux = null;
 	Float weight = (float)1.0;
 	Set<WeightedArc> list = new HashSet<WeightedArc>();
@@ -77,8 +85,15 @@ public class Graph extends ArcLabelledImmutableGraph {
   public Graph ( ArcLabelledImmutableGraph graph , String names[] ) { }
 
   public Graph ( WeightedBVGraph graph ) {
-	this.nodes = new Int2ObjectOpenHashMap<String>(graph.numNodes());
-	this.nodesReverse = new Object2IntOpenHashMap<String>(graph.numNodes());
+	try {
+		File auxFile = File.createTempFile("graph-maps-" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+        	RecordManager recMan = RecordManagerFactory.createRecordManager(auxFile.getAbsolutePath());
+		nodes = recMan.hashMap("nodes");
+		nodesReverse = recMan.hashMap("nodesReverse");
+	} catch ( IOException ex ) { throw new Error(ex); }
+	nodes.clear();
+	nodesReverse.clear();
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	this.graph = graph;
@@ -104,8 +119,15 @@ public class Graph extends ArcLabelledImmutableGraph {
 
   public Graph ( WeightedBVGraph graph, String[] names ) {
 	if ( names.length != graph.numNodes() ) throw new Error("Problem with the list of names for the nodes in the graph.");
-	this.nodes = new Int2ObjectOpenHashMap<String>(graph.numNodes());
-	this.nodesReverse = new Object2IntOpenHashMap<String>(graph.numNodes());
+	try {
+		File auxFile = File.createTempFile("graph-maps-" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+        	RecordManager recMan = RecordManagerFactory.createRecordManager(auxFile.getAbsolutePath());
+		nodes = recMan.hashMap("nodes");
+		nodesReverse = recMan.hashMap("nodesReverse");
+	} catch ( IOException ex ) { throw new Error(ex); }
+	nodes.clear();
+	nodesReverse.clear();
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	this.graph = graph;
@@ -130,8 +152,15 @@ public class Graph extends ArcLabelledImmutableGraph {
   }
 
   public Graph ( BVGraph graph ) {
-	this.nodes = new Int2ObjectOpenHashMap<String>(graph.numNodes());
-	this.nodesReverse = new Object2IntOpenHashMap<String>(graph.numNodes());
+	try {
+		File auxFile = File.createTempFile("graph-maps-" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+        	RecordManager recMan = RecordManagerFactory.createRecordManager(auxFile.getAbsolutePath());
+		nodes = recMan.hashMap("nodes");
+		nodesReverse = recMan.hashMap("nodesReverse");
+	} catch ( IOException ex ) { throw new Error(ex); }
+	nodes.clear();
+	nodesReverse.clear();
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	Integer aux1 = null;
@@ -165,8 +194,15 @@ public class Graph extends ArcLabelledImmutableGraph {
 
   public Graph ( BVGraph graph, String[] names ) {
 	if ( names.length != graph.numNodes() ) throw new Error("Problem with the list of names for the nodes in the graph.");
-	this.nodes = new Int2ObjectOpenHashMap<String>(graph.numNodes());
-	this.nodesReverse = new Object2IntOpenHashMap<String>(graph.numNodes());
+	try {
+		File auxFile = File.createTempFile("graph-maps-" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+        	RecordManager recMan = RecordManagerFactory.createRecordManager(auxFile.getAbsolutePath());
+		nodes = recMan.hashMap("nodes");
+		nodesReverse = recMan.hashMap("nodesReverse");
+	} catch ( IOException ex ) { throw new Error(ex); }
+	nodes.clear();
+	nodesReverse.clear();
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	Integer aux1 = null;
@@ -199,9 +235,9 @@ public class Graph extends ArcLabelledImmutableGraph {
   }
 
   public static Graph merge ( Graph g1 , Graph g2 ) {
+	Set<WeightedArc> list = new HashSet<WeightedArc>();
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
-	Set<WeightedArc> list = new HashSet<WeightedArc>();
 	ArcLabelledNodeIterator it1 = g1.graph.nodeIterator();
 	while ( it1.hasNext() ) {
 		Integer aux1 = it1.nextInt();
@@ -227,8 +263,8 @@ public class Graph extends ArcLabelledImmutableGraph {
                 } catch ( Exception ex ) { throw new Error(ex); }
 	}
 	Graph result = new Graph(list.toArray(new WeightedArc[0]));
-	result.nodes = new Int2ObjectOpenHashMap<String>(result.numNodes());
-	result.nodesReverse = new Object2IntOpenHashMap<String>(result.numNodes());
+	result.nodes.clear();
+	result.nodesReverse.clear();
 	for ( Integer n : g1.nodes.keySet() ) {
 		result.nodesReverse.put(g1.nodes.get(n) , n);
 		result.nodes.put(n , g1.nodes.get(n));
@@ -244,9 +280,9 @@ public class Graph extends ArcLabelledImmutableGraph {
   }
 
   public Graph copy() {
+	Set<WeightedArc> list = new HashSet<WeightedArc>();
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
-	Set<WeightedArc> list = new HashSet<WeightedArc>();
 	ArcLabelledNodeIterator it = graph.nodeIterator();
 	while ( it.hasNext() ) {
 		Integer aux1 = it.nextInt();
@@ -258,8 +294,8 @@ public class Graph extends ArcLabelledImmutableGraph {
                 } catch ( Exception ex ) { throw new Error(ex); }
 	}
 	Graph result = new Graph( list.toArray( new WeightedArc[0] ) );
-	result.nodes = new Int2ObjectOpenHashMap<String>(result.numNodes());
-	result.nodesReverse = new Object2IntOpenHashMap<String>(result.numNodes());
+	result.nodes.clear();
+	result.nodesReverse.clear();
 	for ( Integer n : this.nodes.keySet() ) {
 		result.nodesReverse.put(this.nodes.get(n) , n);
 		result.nodes.put(n , this.nodes.get(n));
@@ -350,18 +386,27 @@ public class Graph extends ArcLabelledImmutableGraph {
   }
 
   public Graph neighbourhoodGraph ( int nnodes[] , int hops ) {
-	int numIterators = 100;
-        Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
-        for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
+  	PrimaryHashMap<Integer,String> nodes;
+  	PrimaryHashMap<String,Integer> nodesReverse;
+	try {
+		File auxFile = File.createTempFile("graph-maps-" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+        	RecordManager recMan = RecordManagerFactory.createRecordManager(auxFile.getAbsolutePath());
+		nodes = recMan.hashMap("nodes");
+		nodesReverse = recMan.hashMap("nodesReverse");
+	} catch ( IOException ex ) { throw new Error(ex); }
+	nodes.clear();
+	nodesReverse.clear();
 	Set<WeightedArc> list1 = new HashSet<WeightedArc>();
 	Int2IntAVLTreeMap map = new Int2IntAVLTreeMap();
 	IntSet set = new IntLinkedOpenHashSet();
+	int numIterators = 100;
+        Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
+        for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	for ( int n : nnodes ) map.put(n,0);
 	NodeIterator its[] = new NodeIterator[numIterators];
 	int  itNum[] = new int[numIterators];
 	for ( int n = 0; n < its.length; n++ ) { its[n] = nodeIterator(); itNum[n] = 0; }
-        Int2ObjectMap<String> nodes = new Int2ObjectOpenHashMap<String>();
-        Object2IntMap<String> nodesReverse = new Object2IntOpenHashMap<String>();
 	while ( map.size() != 0 ) {
 		Integer node = 0;
 		for ( int n = 0; n < its.length; n++ ) if ( itNum[n] <= node ) node = itNum[n];
@@ -421,6 +466,8 @@ public class Graph extends ArcLabelledImmutableGraph {
 		set.add(node);
 	}
 	Graph newGraph = new Graph(list1.toArray(new WeightedArc[0]));
+	newGraph.nodes.clear();
+	newGraph.nodesReverse.clear();
 	newGraph.nodes = nodes;
 	newGraph.nodesReverse = nodesReverse;
 	return newGraph;

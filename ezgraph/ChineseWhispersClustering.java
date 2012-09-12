@@ -6,6 +6,7 @@ import it.unimi.dsi.webgraph.labelling.*;
 import java.util.*;
 import java.io.*;
 import java.lang.reflect.*;
+import jdbm.*;
 
 public class ChineseWhispersClustering {
 
@@ -13,6 +14,7 @@ public class ChineseWhispersClustering {
     
     private Graph graph;
 
+    // TODO: make a map
     private int[] finalAssignments;
 
     private int numClusters;

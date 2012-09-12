@@ -10,17 +10,25 @@ import java.lang.reflect.*;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.*;
 import it.unimi.dsi.logging.ProgressLogger;
+import jdbm.*;
 
 public class UndirectedGraph extends Graph {
 
   public UndirectedGraph ( ) { this( new WeightedArc[]{} ); }
   
   public UndirectedGraph ( String file ) throws IOException {
+	try {
+		File auxFile = File.createTempFile("graph-maps-" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+        	RecordManager recMan = RecordManagerFactory.createRecordManager(auxFile.getAbsolutePath());
+		nodes = recMan.hashMap("nodes");
+		nodesReverse = recMan.hashMap("nodesReverse");
+	} catch ( IOException ex ) { throw new Error(ex); }
+	nodes.clear();
+	nodesReverse.clear();
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	numArcs = 0;
-	nodes = new Int2ObjectOpenHashMap<String>();
-	nodesReverse = new Object2IntOpenHashMap<String>();
 	String aux = null;
 	Float weight = (float)1.0;
 	Set<WeightedArc> list = new HashSet<WeightedArc>();
@@ -56,8 +64,15 @@ public class UndirectedGraph extends Graph {
   public UndirectedGraph ( ArcLabelledImmutableGraph graph , String names[] ) { }
 
   public UndirectedGraph ( WeightedBVGraph graph ) {
-	this.nodes = new Int2ObjectOpenHashMap<String>(graph.numNodes());
-	this.nodesReverse = new Object2IntOpenHashMap<String>(graph.numNodes());
+	try {
+		File auxFile = File.createTempFile("graph-maps-" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+        	RecordManager recMan = RecordManagerFactory.createRecordManager(auxFile.getAbsolutePath());
+		nodes = recMan.hashMap("nodes");
+		nodesReverse = recMan.hashMap("nodesReverse");
+	} catch ( IOException ex ) { throw new Error(ex); }
+	nodes.clear();
+	nodesReverse.clear();
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	this.graph = graph;
@@ -87,8 +102,15 @@ public class UndirectedGraph extends Graph {
 
   public UndirectedGraph ( WeightedBVGraph graph, String[] names ) {
 	if ( names.length != graph.numNodes() ) throw new Error("Problem with the list of names for the nodes in the graph.");
-	this.nodes = new Int2ObjectOpenHashMap<String>(graph.numNodes());
-	this.nodesReverse = new Object2IntOpenHashMap<String>(graph.numNodes());
+	try {
+		File auxFile = File.createTempFile("graph-maps-" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+        	RecordManager recMan = RecordManagerFactory.createRecordManager(auxFile.getAbsolutePath());
+		nodes = recMan.hashMap("nodes");
+		nodesReverse = recMan.hashMap("nodesReverse");
+	} catch ( IOException ex ) { throw new Error(ex); }
+	nodes.clear();
+	nodesReverse.clear();
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	this.graph = graph;
@@ -117,8 +139,15 @@ public class UndirectedGraph extends Graph {
   }
 
   public UndirectedGraph ( BVGraph graph ) {
-	this.nodes = new Int2ObjectOpenHashMap<String>(graph.numNodes());
-	this.nodesReverse = new Object2IntOpenHashMap<String>(graph.numNodes());
+	try {
+		File auxFile = File.createTempFile("graph-maps-" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+        	RecordManager recMan = RecordManagerFactory.createRecordManager(auxFile.getAbsolutePath());
+		nodes = recMan.hashMap("nodes");
+		nodesReverse = recMan.hashMap("nodesReverse");
+	} catch ( IOException ex ) { throw new Error(ex); }
+	nodes.clear();
+	nodesReverse.clear();
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	Integer aux1 = null;
@@ -144,8 +173,15 @@ public class UndirectedGraph extends Graph {
 
   public UndirectedGraph ( BVGraph graph, String[] names ) {
 	if ( names.length != graph.numNodes() ) throw new Error("Problem with the list of names for the nodes in the graph.");
-	this.nodes = new Int2ObjectOpenHashMap<String>(graph.numNodes());
-	this.nodesReverse = new Object2IntOpenHashMap<String>(graph.numNodes());
+	try {
+		File auxFile = File.createTempFile("graph-maps-" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+        	RecordManager recMan = RecordManagerFactory.createRecordManager(auxFile.getAbsolutePath());
+		nodes = recMan.hashMap("nodes");
+		nodesReverse = recMan.hashMap("nodesReverse");
+	} catch ( IOException ex ) { throw new Error(ex); }
+	nodes.clear();
+	nodesReverse.clear();
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	Integer aux1 = null;
@@ -185,8 +221,8 @@ public class UndirectedGraph extends Graph {
                 } catch ( Exception ex ) { throw new Error(ex); }
 	}
 	UndirectedGraph result = new UndirectedGraph( list.toArray( new WeightedArc[0] ) );
-	result.nodes = new Int2ObjectOpenHashMap<String>(result.numNodes());
-	result.nodesReverse = new Object2IntOpenHashMap<String>(result.numNodes());
+	result.nodes.clear();
+	result.nodesReverse.clear();
 	for ( Integer n : this.nodes.keySet() ) {
 		result.nodesReverse.put(this.nodes.get(n) , n);
 		result.nodes.put(n , this.nodes.get(n));
