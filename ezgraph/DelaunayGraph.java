@@ -13,14 +13,12 @@ import it.unimi.dsi.fastutil.objects.*;
 import it.unimi.dsi.logging.ProgressLogger;
 import jdbm.*;
 
-// TODO : List of vertices at disk
-
 public class DelaunayGraph extends UndirectedGraph {
 
     public DelaunayGraph ( String file ) throws IOException {
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
-	Set<WeightedArc> list = new HashSet<WeightedArc>();
+	Set<WeightedArc> list = new WeightedArcSet();
         Simplex triangle = new Simplex(new Pnt[] {new Pnt(-180.0,-90.0), new Pnt(-180, 90 + 180), new Pnt(180 + 360,-90)});
         neighbors = new HashMap();
         neighbors.put(triangle, new HashSet());
@@ -105,9 +103,7 @@ public class DelaunayGraph extends UndirectedGraph {
         return null;
     }
     
-    private Set neighbors (Simplex simplex) {
-        return new HashSet((Set) this.neighbors.get(simplex));
-    }
+    private Set neighbors (Simplex simplex) { return new HashSet((Set) this.neighbors.get(simplex)); }
     
     private void update (Set oldSet, Set newSet) {
         Set allNeighbors = new HashSet();
@@ -288,14 +284,11 @@ class Pnt {
     }
         
     public static double determinant (Pnt[] matrix) {
-        if (matrix.length != matrix[0].dimension())
-            throw new IllegalArgumentException("Matrix is not square");
+        if (matrix.length != matrix[0].dimension()) throw new IllegalArgumentException("Matrix is not square");
         boolean[] columns = new boolean[matrix.length];
         for (int i = 0; i < matrix.length; i++) columns[i] = true;
-        try {return determinant(matrix, 0, columns);}
-        catch (ArrayIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("Matrix is wrong shape");
-        }
+        try { return determinant(matrix, 0, columns); }
+        catch (ArrayIndexOutOfBoundsException e) { throw new IllegalArgumentException("Matrix is wrong shape"); }
     }
     
     private static double determinant(Pnt[] matrix, int row, boolean[] columns) {
@@ -305,8 +298,7 @@ class Pnt {
         for (int col = 0; col < columns.length; col++) {
             if (!columns[col]) continue;
             columns[col] = false;
-            sum += sign * matrix[row].coordinates[col] *
-                   determinant(matrix, row+1, columns);
+            sum += sign * matrix[row].coordinates[col] * determinant(matrix, row+1, columns);
             columns[col] = true;
             sign = -sign;
         }
@@ -315,8 +307,7 @@ class Pnt {
     
     public static Pnt cross (Pnt[] matrix) {
         int len = matrix.length + 1;
-        if (len != matrix[0].dimension())
-            throw new IllegalArgumentException("Dimension mismatch");
+        if (len != matrix[0].dimension()) throw new IllegalArgumentException("Dimension mismatch");
         boolean[] columns = new boolean[len];
         for (int i = 0; i < len; i++) columns[i] = true;
         double[] result = new double[len];
@@ -336,8 +327,7 @@ class Pnt {
     
     public static double content (Pnt[] simplex) {
         Pnt[] matrix = new Pnt[simplex.length];
-        for (int i = 0; i < matrix.length; i++)
-            matrix[i] = simplex[i].extend(new double[] {1});
+        for (int i = 0; i < matrix.length; i++) matrix[i] = simplex[i].extend(new double[] {1});
         int fact = 1;
         for (int i = 1; i < matrix.length; i++) fact = fact*i;
         return determinant(matrix) / fact;
@@ -345,16 +335,14 @@ class Pnt {
     
     public int[] relation (Pnt[] simplex) {
         int dim = simplex.length - 1;
-        if (this.dimension() != dim)
-            throw new IllegalArgumentException("Dimension mismatch");
+        if (this.dimension() != dim) throw new IllegalArgumentException("Dimension mismatch");
         Pnt[] matrix = new Pnt[dim+1];
         double[] coords = new double[dim+2];
         for (int j = 0; j < coords.length; j++) coords[j] = 1;
         matrix[0] = new Pnt(coords);
         for (int i = 0; i < dim; i++) {
             coords[0] = this.coordinates[i];
-            for (int j = 0; j < simplex.length; j++) 
-                coords[j+1] = simplex[j].coordinates[i];
+            for (int j = 0; j < simplex.length; j++) coords[j+1] = simplex[j].coordinates[i];
             matrix[i+1] = new Pnt(coords);
         }
         Pnt vector = cross(matrix);
@@ -377,9 +365,7 @@ class Pnt {
     
     public Pnt isOutside (Pnt[] simplex) {
         int[] result = this.relation(simplex);
-        for (int i = 0; i < result.length; i++) {
-            if (result[i] > 0) return simplex[i];
-        }
+        for (int i = 0; i < result.length; i++) if (result[i] > 0) return simplex[i];
         return null;
     }
     
@@ -477,20 +463,12 @@ class Simplex extends AbstractSet implements Set {
         return theBoundary;
     }
     
-    public Iterator iterator () {
-        return this.vertices.iterator();
-    }
+    public Iterator iterator () { return this.vertices.iterator(); }
     
-    public int size () {
-        return this.vertices.size();
-    }
+    public int size () { return this.vertices.size(); }
     
-    public int hashCode () {
-        return (int)(idNumber^(idNumber>>>32));
-    }
+    public int hashCode () { return (int)(idNumber^(idNumber>>>32)); }
     
-    public boolean equals (Object o) {
-        return (this == o);
-    }
+    public boolean equals (Object o) { return (this == o); }
 
 }

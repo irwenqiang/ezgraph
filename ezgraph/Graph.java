@@ -38,10 +38,9 @@ public class Graph extends ArcLabelledImmutableGraph {
 	nodesReverse.clear();
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
-	numArcs = 0;
 	String aux = null;
 	Float weight = (float)1.0;
-	Set<WeightedArc> list = new HashSet<WeightedArc>();
+	Set<WeightedArc> list = new WeightedArcSet();
 	BufferedReader br;
 	try { 
 		br = new BufferedReader(new InputStreamReader( new GZIPInputStream( new FileInputStream(file) ))); 
@@ -59,7 +58,7 @@ public class Graph extends ArcLabelledImmutableGraph {
 	} catch ( Exception ex ) { throw new Error(ex); }
 	this.graph = new WeightedBVGraph( list.toArray( new WeightedArc[0] ) );
 	br.close();
-	list = new HashSet<WeightedArc>();
+	list = new WeightedArcSet();
 	br = new BufferedReader(new FileReader(file));
 	while ( ( aux = br.readLine() ) != null ) try {
 		String parts[] = aux.split("\t");
@@ -72,6 +71,12 @@ public class Graph extends ArcLabelledImmutableGraph {
 	this.reverse = new WeightedBVGraph( list.toArray( new WeightedArc[0] ) );
 	numArcs = list.size();
 	iterator = nodeIterator();
+	try {
+		File auxFile = File.createTempFile("graph" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+		String basename = auxFile.getAbsolutePath();
+		store(basename);
+	} catch ( IOException ex ) { throw new Error(ex); }
   }
 
   public Graph ( ) { this( new WeightedArc[]{} ); }
@@ -97,7 +102,7 @@ public class Graph extends ArcLabelledImmutableGraph {
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	this.graph = graph;
-	Set<WeightedArc> list = new HashSet<WeightedArc>();
+	Set<WeightedArc> list = new WeightedArcSet();
 	ArcLabelledNodeIterator it = graph.nodeIterator();
 	while ( it.hasNext() ) {
 		Integer aux1 = it.nextInt();
@@ -115,6 +120,12 @@ public class Graph extends ArcLabelledImmutableGraph {
 	reverse = new WeightedBVGraph( list.toArray( new WeightedArc[0] ) );
 	numArcs = list.size();
 	iterator = nodeIterator();
+	try {
+		File auxFile = File.createTempFile("graph" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+		String basename = auxFile.getAbsolutePath();
+		store(basename);
+	} catch ( IOException ex ) { throw new Error(ex); }
   }
 
   public Graph ( WeightedBVGraph graph, String[] names ) {
@@ -131,7 +142,7 @@ public class Graph extends ArcLabelledImmutableGraph {
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	this.graph = graph;
-	Set<WeightedArc> list = new HashSet<WeightedArc>();
+	Set<WeightedArc> list = new WeightedArcSet();
 	ArcLabelledNodeIterator it = graph.nodeIterator();
 	while ( it.hasNext() ) {
 		Integer aux1 = it.nextInt();
@@ -149,6 +160,12 @@ public class Graph extends ArcLabelledImmutableGraph {
 	reverse = new WeightedBVGraph( list.toArray( new WeightedArc[0] ) );
 	numArcs = list.size();
 	iterator = nodeIterator();
+	try {
+		File auxFile = File.createTempFile("graph" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+		String basename = auxFile.getAbsolutePath();
+		store(basename);
+	} catch ( IOException ex ) { throw new Error(ex); }
   }
 
   public Graph ( BVGraph graph ) {
@@ -164,7 +181,7 @@ public class Graph extends ArcLabelledImmutableGraph {
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	Integer aux1 = null;
-	Set<WeightedArc> list = new HashSet<WeightedArc>();
+	Set<WeightedArc> list = new WeightedArcSet();
 	it.unimi.dsi.webgraph.NodeIterator it = graph.nodeIterator();
 	while ( (aux1 = it.nextInt()) != null) {
 		LazyIntIterator suc = it.successors();
@@ -174,7 +191,7 @@ public class Graph extends ArcLabelledImmutableGraph {
                 } catch ( Exception ex ) { throw new Error(ex); }
 	}
 	this.graph = new WeightedBVGraph( list.toArray( new WeightedArc[0] ) );
-	list = new HashSet<WeightedArc>();
+	list = new WeightedArcSet();
 	it = graph.nodeIterator();
 	while ( (aux1 = it.nextInt()) != null) {
 		LazyIntIterator suc = it.successors();
@@ -190,6 +207,12 @@ public class Graph extends ArcLabelledImmutableGraph {
 	this.reverse = new WeightedBVGraph( list.toArray( new WeightedArc[0] ) );
 	numArcs = list.size();
 	iterator = nodeIterator();
+	try {
+		File auxFile = File.createTempFile("graph" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+		String basename = auxFile.getAbsolutePath();
+		store(basename);
+	} catch ( IOException ex ) { throw new Error(ex); }
   }
 
   public Graph ( BVGraph graph, String[] names ) {
@@ -206,7 +229,7 @@ public class Graph extends ArcLabelledImmutableGraph {
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	Integer aux1 = null;
-	Set<WeightedArc> list = new HashSet<WeightedArc>();
+	Set<WeightedArc> list = new WeightedArcSet();
 	it.unimi.dsi.webgraph.NodeIterator it = graph.nodeIterator();
 	while ( (aux1 = it.nextInt()) != null) {
 		LazyIntIterator suc = it.successors();
@@ -216,7 +239,7 @@ public class Graph extends ArcLabelledImmutableGraph {
                 } catch ( Exception ex ) { throw new Error(ex); }
 	}
 	this.graph = new WeightedBVGraph( list.toArray( new WeightedArc[0] ) );
-	list = new HashSet<WeightedArc>();
+	list = new WeightedArcSet();
 	it = graph.nodeIterator();
 	while ( (aux1 = it.nextInt()) != null) {
 		LazyIntIterator suc = it.successors();
@@ -232,10 +255,16 @@ public class Graph extends ArcLabelledImmutableGraph {
 	this.reverse = new WeightedBVGraph( list.toArray( new WeightedArc[0] ) );
 	numArcs = list.size();
 	iterator = nodeIterator();
+	try {
+		File auxFile = File.createTempFile("graph" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+		String basename = auxFile.getAbsolutePath();
+		store(basename);
+	} catch ( IOException ex ) { throw new Error(ex); }
   }
 
   public static Graph merge ( Graph g1 , Graph g2 ) {
-	Set<WeightedArc> list = new HashSet<WeightedArc>();
+	Set<WeightedArc> list = new WeightedArcSet();
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	ArcLabelledNodeIterator it1 = g1.graph.nodeIterator();
@@ -280,7 +309,7 @@ public class Graph extends ArcLabelledImmutableGraph {
   }
 
   public Graph copy() {
-	Set<WeightedArc> list = new HashSet<WeightedArc>();
+	Set<WeightedArc> list = new WeightedArcSet();
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	ArcLabelledNodeIterator it = graph.nodeIterator();
@@ -303,29 +332,28 @@ public class Graph extends ArcLabelledImmutableGraph {
 	return result;
   }
 
-  public void store ( CharSequence basename ) throws java.io.IOException {
-	BVGraph.store( graph, basename + ArcLabelledImmutableGraph.UNDERLYINGGRAPH_SUFFIX );
+  protected void store ( CharSequence basename ) throws java.io.IOException {
+	BVGraph.store( graph, basename + ArcLabelledImmutableGraph.UNDERLYINGGRAPH_SUFFIX);
 	BitStreamArcLabelledImmutableGraph.store( graph, basename, basename + ArcLabelledImmutableGraph.UNDERLYINGGRAPH_SUFFIX );
-	graph = WeightedBVGraph.load(basename + ArcLabelledImmutableGraph.UNDERLYINGGRAPH_SUFFIX);
-
+	graph = BitStreamArcLabelledImmutableGraph.loadSequential( basename );
 	BVGraph.store( reverse, basename + ".reverse" + ArcLabelledImmutableGraph.UNDERLYINGGRAPH_SUFFIX );
 	BitStreamArcLabelledImmutableGraph.store( reverse, basename + ".reverse", basename  + ".reverse" + ArcLabelledImmutableGraph.UNDERLYINGGRAPH_SUFFIX );
-	reverse = WeightedBVGraph.load(basename + ".reverse" + ArcLabelledImmutableGraph.UNDERLYINGGRAPH_SUFFIX);
+	reverse = BitStreamArcLabelledImmutableGraph.loadSequential( basename + ".reverse" );
   }
 
-  public static Graph load(CharSequence basename) throws java.io.IOException { return new Graph(WeightedBVGraph.load(basename)); }
+  public static Graph load(CharSequence basename) throws java.io.IOException { throw new UnsupportedOperationException(); }
            
-  public static Graph load(CharSequence basename, ProgressLogger pl) throws java.io.IOException { return new Graph(WeightedBVGraph.load(basename,pl)); }
+  public static Graph load(CharSequence basename, ProgressLogger pl) throws java.io.IOException { throw new UnsupportedOperationException(); }
            
-  public static Graph loadOffline(CharSequence basename) throws java.io.IOException { return new Graph(WeightedBVGraph.loadOffline(basename)); }
+  public static Graph loadOffline(CharSequence basename) throws java.io.IOException { throw new UnsupportedOperationException(); }
            
-  public static Graph loadOffline(CharSequence basename, ProgressLogger pl) throws java.io.IOException { return new Graph(WeightedBVGraph.loadOffline(basename,pl)); }
+  public static Graph loadOffline(CharSequence basename, ProgressLogger pl) throws java.io.IOException { throw new UnsupportedOperationException(); }
            
-  public static Graph loadOnce(InputStream is) throws java.io.IOException { return new Graph(WeightedBVGraph.loadOnce(is));}
+  public static Graph loadOnce(InputStream is) throws java.io.IOException { throw new UnsupportedOperationException(); }
            
-  public static Graph loadSequential(CharSequence basename) throws java.io.IOException { return new Graph(WeightedBVGraph.loadSequential(basename)); }
+  public static Graph loadSequential(CharSequence basename) throws java.io.IOException { throw new UnsupportedOperationException(); }
            
-  public static Graph loadSequential(CharSequence basename, ProgressLogger pl) throws java.io.IOException { return new Graph(WeightedBVGraph.loadSequential(basename,pl)); }
+  public static Graph loadSequential(CharSequence basename, ProgressLogger pl) throws java.io.IOException { throw new UnsupportedOperationException(); }
 
   private NodeIterator advanceIterator ( int x ) {
 	if ( x >= graph.numNodes() ) throw new Error("Problem with the id for the node.");
@@ -397,7 +425,7 @@ public class Graph extends ArcLabelledImmutableGraph {
 	} catch ( IOException ex ) { throw new Error(ex); }
 	nodes.clear();
 	nodesReverse.clear();
-	Set<WeightedArc> list1 = new HashSet<WeightedArc>();
+	Set<WeightedArc> list1 = new WeightedArcSet();
 	Int2IntAVLTreeMap map = new Int2IntAVLTreeMap();
 	IntSet set = new IntLinkedOpenHashSet();
 	int numIterators = 100;
@@ -478,3 +506,4 @@ public class Graph extends ArcLabelledImmutableGraph {
   public boolean randomAccess() { return true; }
 
 }
+

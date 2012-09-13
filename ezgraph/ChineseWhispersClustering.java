@@ -14,7 +14,6 @@ public class ChineseWhispersClustering {
     
     private Graph graph;
 
-    // TODO: make a map
     private int[] finalAssignments;
 
     private int numClusters;

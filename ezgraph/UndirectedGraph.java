@@ -31,7 +31,7 @@ public class UndirectedGraph extends Graph {
 	numArcs = 0;
 	String aux = null;
 	Float weight = (float)1.0;
-	Set<WeightedArc> list = new HashSet<WeightedArc>();
+	Set<WeightedArc> list = new WeightedArcSet();
 	BufferedReader br;
 	try { 
 		br = new BufferedReader(new InputStreamReader( new GZIPInputStream( new FileInputStream(file) ))); 
@@ -53,6 +53,12 @@ public class UndirectedGraph extends Graph {
 	br.close();
 	numArcs = list.size();
 	iterator = nodeIterator();
+	try {
+		File auxFile = File.createTempFile("graph" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+		String basename = auxFile.getAbsolutePath();
+		store(basename);
+	} catch ( IOException ex ) { throw new Error(ex); }
   }
 
   public UndirectedGraph ( WeightedArc[] arcs ) { this( new WeightedBVGraph( arcs ) ); }
@@ -77,7 +83,7 @@ public class UndirectedGraph extends Graph {
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	this.graph = graph;
 	this.reverse  = graph;
-	Set<WeightedArc> list = new HashSet<WeightedArc>();
+	Set<WeightedArc> list = new WeightedArcSet();
 	ArcLabelledNodeIterator it = graph.nodeIterator();
 	numArcs = 0;
 	while ( it.hasNext() ) {
@@ -98,6 +104,12 @@ public class UndirectedGraph extends Graph {
 	this.reverse = this.graph;
 	numArcs = list.size();
 	iterator = nodeIterator();
+	try {
+		File auxFile = File.createTempFile("graph" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+		String basename = auxFile.getAbsolutePath();
+		store(basename);
+	} catch ( IOException ex ) { throw new Error(ex); }
   }
 
   public UndirectedGraph ( WeightedBVGraph graph, String[] names ) {
@@ -115,7 +127,7 @@ public class UndirectedGraph extends Graph {
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	this.graph = graph;
 	this.reverse = graph;
-	Set<WeightedArc> list = new HashSet<WeightedArc>();
+	Set<WeightedArc> list = new WeightedArcSet();
 	ArcLabelledNodeIterator it = graph.nodeIterator();
 	numArcs = 0;
 	while ( it.hasNext() ) {
@@ -136,6 +148,12 @@ public class UndirectedGraph extends Graph {
 	this.reverse = this.graph;
 	numArcs = list.size();
 	iterator = nodeIterator();
+	try {
+		File auxFile = File.createTempFile("graph" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+		String basename = auxFile.getAbsolutePath();
+		store(basename);
+	} catch ( IOException ex ) { throw new Error(ex); }
   }
 
   public UndirectedGraph ( BVGraph graph ) {
@@ -151,7 +169,7 @@ public class UndirectedGraph extends Graph {
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	Integer aux1 = null;
-	Set<WeightedArc> list = new HashSet<WeightedArc>();
+	Set<WeightedArc> list = new WeightedArcSet();
 	it.unimi.dsi.webgraph.NodeIterator it = graph.nodeIterator();
 	while ( (aux1 = it.nextInt()) != null) {
 		LazyIntIterator suc = it.successors();
@@ -169,6 +187,12 @@ public class UndirectedGraph extends Graph {
 	this.reverse = this.graph;
 	numArcs = list.size();
 	iterator = nodeIterator();
+	try {
+		File auxFile = File.createTempFile("graph" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+		String basename = auxFile.getAbsolutePath();
+		store(basename);
+	} catch ( IOException ex ) { throw new Error(ex); }
   }
 
   public UndirectedGraph ( BVGraph graph, String[] names ) {
@@ -185,7 +209,7 @@ public class UndirectedGraph extends Graph {
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	Integer aux1 = null;
-	Set<WeightedArc> list = new HashSet<WeightedArc>();
+	Set<WeightedArc> list = new WeightedArcSet();
 	it.unimi.dsi.webgraph.NodeIterator it = graph.nodeIterator();
 	while ( (aux1 = it.nextInt()) != null) {
 		LazyIntIterator suc = it.successors();
@@ -203,13 +227,19 @@ public class UndirectedGraph extends Graph {
 	this.reverse = this.graph;
 	numArcs = list.size();
 	iterator = nodeIterator();
+	try {
+		File auxFile = File.createTempFile("graph" + System.currentTimeMillis(),"aux");
+		auxFile.deleteOnExit();
+		String basename = auxFile.getAbsolutePath();
+		store(basename);
+	} catch ( IOException ex ) { throw new Error(ex); }
   }
 
 
   public UndirectedGraph copy() {
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
-	Set<WeightedArc> list = new HashSet<WeightedArc>();
+	Set<WeightedArc> list = new WeightedArcSet();
 	ArcLabelledNodeIterator it = graph.nodeIterator();
 	while ( it.hasNext() ) {
 		Integer aux1 = it.nextInt();
