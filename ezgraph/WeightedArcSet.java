@@ -49,6 +49,13 @@ public class WeightedArcSet implements Set<WeightedArc> {
 	try { set.getRecordManager().commit(); } catch ( IOException e ) { throw new Error(e); }
   };
 
+  protected void finalize () throws Throwable {
+	super.finalize();
+	set.clear();
+	set.getRecordManager().commit();
+	set.getRecordManager().close();
+  }
+
   public boolean add ( WeightedArc arc ) { 
 	if ( contains(arc) ) return false;
 	set.put(arc,true); 

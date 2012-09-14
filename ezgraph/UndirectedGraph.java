@@ -31,7 +31,7 @@ public class UndirectedGraph extends Graph {
 	numArcs = 0;
 	String aux = null;
 	Float weight = (float)1.0;
-	Set<WeightedArc> list = new WeightedArcSet();
+	WeightedArcSet list = new WeightedArcSet();
 	BufferedReader br;
 	try { 
 		br = new BufferedReader(new InputStreamReader( new GZIPInputStream( new FileInputStream(file) ))); 
@@ -39,6 +39,7 @@ public class UndirectedGraph extends Graph {
 		br = new BufferedReader(new FileReader(file));
 	}
 	while ( ( aux = br.readLine() ) != null ) try {
+		if ( commit++ % COMMIT_SIZE == 0 ) { commit(); list.commit(); }
 		String parts[] = aux.split("\t");
 		String l1 = new String(parts[0]);
 		String l2 = new String(parts[1]);
@@ -83,7 +84,7 @@ public class UndirectedGraph extends Graph {
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	this.graph = graph;
 	this.reverse  = graph;
-	Set<WeightedArc> list = new WeightedArcSet();
+	WeightedArcSet list = new WeightedArcSet();
 	ArcLabelledNodeIterator it = graph.nodeIterator();
 	numArcs = 0;
 	while ( it.hasNext() ) {
@@ -91,6 +92,7 @@ public class UndirectedGraph extends Graph {
 		Integer aux2 = null;
 		ArcLabelledNodeIterator.LabelledArcIterator suc = it.successors();
 		while ( (aux2 = suc.nextInt()) != null && aux2 >= 0 && ( aux2 < graph.numNodes() ) ) try {
+		  if ( commit++ % COMMIT_SIZE == 0 ) { commit(); list.commit(); }
 		  list.add((WeightedArc)cons[0].newInstance(aux1,aux2,suc.label().getFloat()));
 		  list.add((WeightedArc)cons[0].newInstance(aux2,aux1,suc.label().getFloat()));
 		  this.nodes.put(aux1, "" + aux1);
@@ -127,7 +129,7 @@ public class UndirectedGraph extends Graph {
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	this.graph = graph;
 	this.reverse = graph;
-	Set<WeightedArc> list = new WeightedArcSet();
+	WeightedArcSet list = new WeightedArcSet();
 	ArcLabelledNodeIterator it = graph.nodeIterator();
 	numArcs = 0;
 	while ( it.hasNext() ) {
@@ -135,6 +137,7 @@ public class UndirectedGraph extends Graph {
 		Integer aux2 = null;
 		ArcLabelledNodeIterator.LabelledArcIterator suc = it.successors();
 		while ( (aux2 = suc.nextInt()) != null && aux2 >= 0 && ( aux2 < graph.numNodes() ) ) try {
+		  if ( commit++ % COMMIT_SIZE == 0 ) { commit(); list.commit(); }
 		  list.add((WeightedArc)cons[0].newInstance(aux1,aux2,suc.label().getFloat()));
 		  list.add((WeightedArc)cons[0].newInstance(aux2,aux1,suc.label().getFloat()));
 		  this.nodes.put(aux1, names[aux1]);
@@ -169,12 +172,13 @@ public class UndirectedGraph extends Graph {
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	Integer aux1 = null;
-	Set<WeightedArc> list = new WeightedArcSet();
+	WeightedArcSet list = new WeightedArcSet();
 	it.unimi.dsi.webgraph.NodeIterator it = graph.nodeIterator();
 	while ( (aux1 = it.nextInt()) != null) {
 		LazyIntIterator suc = it.successors();
 		Integer aux2 = null;
 		while ( (aux2 = suc.nextInt()) != null && aux2 >= 0 && ( aux2 < graph.numNodes() ) ) try {
+		  if ( commit++ % COMMIT_SIZE == 0 ) { commit(); list.commit(); }
 		  list.add((WeightedArc)cons[0].newInstance(aux1,aux2,(float)1.0));
 		  list.add((WeightedArc)cons[0].newInstance(aux2,aux1,(float)1.0));
 		  this.nodes.put(aux1, "" + aux1);
@@ -209,12 +213,13 @@ public class UndirectedGraph extends Graph {
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	Integer aux1 = null;
-	Set<WeightedArc> list = new WeightedArcSet();
+	WeightedArcSet list = new WeightedArcSet();
 	it.unimi.dsi.webgraph.NodeIterator it = graph.nodeIterator();
 	while ( (aux1 = it.nextInt()) != null) {
 		LazyIntIterator suc = it.successors();
 		Integer aux2 = null;
 		while ( (aux2 = suc.nextInt()) != null && aux2 >= 0 && ( aux2 < graph.numNodes() ) ) try {
+		  if ( commit++ % COMMIT_SIZE == 0 ) { commit(); list.commit(); }
 		  list.add((WeightedArc)cons[0].newInstance(aux1,aux2,(float)1.0));
 		  list.add((WeightedArc)cons[0].newInstance(aux2,aux1,(float)1.0));
 		  this.nodes.put(aux1, names[aux1]);
@@ -239,13 +244,14 @@ public class UndirectedGraph extends Graph {
   public UndirectedGraph copy() {
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
-	Set<WeightedArc> list = new WeightedArcSet();
+	WeightedArcSet list = new WeightedArcSet();
 	ArcLabelledNodeIterator it = graph.nodeIterator();
 	while ( it.hasNext() ) {
 		Integer aux1 = it.nextInt();
 		Integer aux2 = null;
 		ArcLabelledNodeIterator.LabelledArcIterator suc = it.successors();
 		while ( (aux2 = suc.nextInt()) != null && aux2 >= 0 && ( aux2 < graph.numNodes() ) ) try {
+		  if ( commit++ % COMMIT_SIZE == 0 ) { list.commit(); }
 		  WeightedArc arc = (WeightedArc)cons[0].newInstance(aux2, aux1, suc.label().getFloat());
 		  list.add(arc);
                 } catch ( Exception ex ) { throw new Error(ex); }
@@ -254,6 +260,7 @@ public class UndirectedGraph extends Graph {
 	result.nodes.clear();
 	result.nodesReverse.clear();
 	for ( Integer n : this.nodes.keySet() ) {
+		if ( commit++ % COMMIT_SIZE == 0 ) { result.commit(); }
 		result.nodesReverse.put(this.nodes.get(n) , n);
 		result.nodes.put(n , this.nodes.get(n));
 	}

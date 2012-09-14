@@ -14,6 +14,10 @@ import jdbm.*;
 
 public class Graph extends ArcLabelledImmutableGraph {
 
+  protected static int COMMIT_SIZE = 5000;
+
+  protected int commit = 0;
+
   protected ezgraph.NodeIterator iterator;
 
   protected PrimaryHashMap<Integer,String> nodes;
@@ -40,7 +44,7 @@ public class Graph extends ArcLabelledImmutableGraph {
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	String aux = null;
 	Float weight = (float)1.0;
-	Set<WeightedArc> list = new WeightedArcSet();
+	WeightedArcSet list = new WeightedArcSet();
 	BufferedReader br;
 	try { 
 		br = new BufferedReader(new InputStreamReader( new GZIPInputStream( new FileInputStream(file) ))); 
@@ -48,6 +52,7 @@ public class Graph extends ArcLabelledImmutableGraph {
 		br = new BufferedReader(new FileReader(file));
 	}
 	while ( ( aux = br.readLine() ) != null ) try {
+		if ( commit++ % COMMIT_SIZE == 0 ) { commit(); list.commit(); }
 		String parts[] = aux.split("\t");
 		String l1 = new String(parts[0]);
 		String l2 = new String(parts[1]);
@@ -61,6 +66,7 @@ public class Graph extends ArcLabelledImmutableGraph {
 	list = new WeightedArcSet();
 	br = new BufferedReader(new FileReader(file));
 	while ( ( aux = br.readLine() ) != null ) try {
+		if ( commit++ % COMMIT_SIZE == 0 ) { commit(); list.commit(); }
 		String parts[] = aux.split("\t");
 		String l1 = new String(parts[0]);
 		String l2 = new String(parts[1]);
@@ -77,6 +83,7 @@ public class Graph extends ArcLabelledImmutableGraph {
 		String basename = auxFile.getAbsolutePath();
 		store(basename);
 	} catch ( IOException ex ) { throw new Error(ex); }
+	commit();
   }
 
   public Graph ( ) { this( new WeightedArc[]{} ); }
@@ -102,13 +109,14 @@ public class Graph extends ArcLabelledImmutableGraph {
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	this.graph = graph;
-	Set<WeightedArc> list = new WeightedArcSet();
+	WeightedArcSet list = new WeightedArcSet();
 	ArcLabelledNodeIterator it = graph.nodeIterator();
 	while ( it.hasNext() ) {
 		Integer aux1 = it.nextInt();
 		Integer aux2 = null;
 		ArcLabelledNodeIterator.LabelledArcIterator suc = it.successors();
 		while ( (aux2 = suc.nextInt()) != null && aux2 >= 0 && ( aux2 < graph.numNodes() ) ) try {
+		  if ( commit++ % COMMIT_SIZE == 0 ) { commit(); list.commit(); }
 		  WeightedArc arc = (WeightedArc)cons[0].newInstance(aux2, aux1, suc.label().getFloat());
 		  list.add(arc);
 		  this.nodes.put(aux1, "" + aux1);
@@ -126,6 +134,7 @@ public class Graph extends ArcLabelledImmutableGraph {
 		String basename = auxFile.getAbsolutePath();
 		store(basename);
 	} catch ( IOException ex ) { throw new Error(ex); }
+	commit();
   }
 
   public Graph ( WeightedBVGraph graph, String[] names ) {
@@ -142,9 +151,10 @@ public class Graph extends ArcLabelledImmutableGraph {
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	this.graph = graph;
-	Set<WeightedArc> list = new WeightedArcSet();
+	WeightedArcSet list = new WeightedArcSet();
 	ArcLabelledNodeIterator it = graph.nodeIterator();
 	while ( it.hasNext() ) {
+		if ( commit++ % COMMIT_SIZE == 0 ) { commit(); list.commit(); }
 		Integer aux1 = it.nextInt();
 		Integer aux2 = null;
 		ArcLabelledNodeIterator.LabelledArcIterator suc = it.successors();
@@ -166,6 +176,7 @@ public class Graph extends ArcLabelledImmutableGraph {
 		String basename = auxFile.getAbsolutePath();
 		store(basename);
 	} catch ( IOException ex ) { throw new Error(ex); }
+	commit();
   }
 
   public Graph ( BVGraph graph ) {
@@ -181,12 +192,13 @@ public class Graph extends ArcLabelledImmutableGraph {
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	Integer aux1 = null;
-	Set<WeightedArc> list = new WeightedArcSet();
+	WeightedArcSet list = new WeightedArcSet();
 	it.unimi.dsi.webgraph.NodeIterator it = graph.nodeIterator();
 	while ( (aux1 = it.nextInt()) != null) {
 		LazyIntIterator suc = it.successors();
 		Integer aux2 = null;
 		while ( (aux2 = suc.nextInt()) != null && aux2 >= 0 && ( aux2 < graph.numNodes() ) ) try {
+		  if ( commit++ % COMMIT_SIZE == 0 ) { list.commit(); }
 		  list.add((WeightedArc)cons[0].newInstance(aux1,aux2,(float)1.0));
                 } catch ( Exception ex ) { throw new Error(ex); }
 	}
@@ -197,6 +209,7 @@ public class Graph extends ArcLabelledImmutableGraph {
 		LazyIntIterator suc = it.successors();
 		Integer aux2 = null;
 		while ( (aux2 = suc.nextInt()) != null && aux2 >= 0 && ( aux2 < graph.numNodes() ) ) try {
+		  if ( commit++ % COMMIT_SIZE == 0 ) { commit(); list.commit(); }
 		  list.add((WeightedArc)cons[0].newInstance(aux2,aux1,(float)1.0));
 		  this.nodes.put(aux1, "" + aux1);
 		  this.nodes.put(aux2, "" + aux2);
@@ -213,6 +226,7 @@ public class Graph extends ArcLabelledImmutableGraph {
 		String basename = auxFile.getAbsolutePath();
 		store(basename);
 	} catch ( IOException ex ) { throw new Error(ex); }
+	commit();
   }
 
   public Graph ( BVGraph graph, String[] names ) {
@@ -229,12 +243,13 @@ public class Graph extends ArcLabelledImmutableGraph {
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	Integer aux1 = null;
-	Set<WeightedArc> list = new WeightedArcSet();
+	WeightedArcSet list = new WeightedArcSet();
 	it.unimi.dsi.webgraph.NodeIterator it = graph.nodeIterator();
 	while ( (aux1 = it.nextInt()) != null) {
 		LazyIntIterator suc = it.successors();
 		Integer aux2 = null;
 		while ( (aux2 = suc.nextInt()) != null && aux2 >= 0 && ( aux2 < graph.numNodes() ) ) try {
+		  if ( commit++ % COMMIT_SIZE == 0 ) { list.commit(); }
 		  list.add((WeightedArc)cons[0].newInstance(aux1,aux2,(float)1.0));
                 } catch ( Exception ex ) { throw new Error(ex); }
 	}
@@ -245,6 +260,7 @@ public class Graph extends ArcLabelledImmutableGraph {
 		LazyIntIterator suc = it.successors();
 		Integer aux2 = null;
 		while ( (aux2 = suc.nextInt()) != null && aux2 >= 0 && ( aux2 < graph.numNodes() ) ) try {
+		  if ( commit++ % COMMIT_SIZE == 0 ) { commit(); list.commit(); }
 		  list.add((WeightedArc)cons[0].newInstance(aux2,aux1,(float)1.0));
 		  this.nodes.put(aux1, names[aux1]);
 		  this.nodes.put(aux2, names[aux2]);
@@ -261,10 +277,12 @@ public class Graph extends ArcLabelledImmutableGraph {
 		String basename = auxFile.getAbsolutePath();
 		store(basename);
 	} catch ( IOException ex ) { throw new Error(ex); }
+	commit();
   }
 
   public static Graph merge ( Graph g1 , Graph g2 ) {
-	Set<WeightedArc> list = new WeightedArcSet();
+	int commit = 0;
+	WeightedArcSet list = new WeightedArcSet();
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	ArcLabelledNodeIterator it1 = g1.graph.nodeIterator();
@@ -275,6 +293,7 @@ public class Graph extends ArcLabelledImmutableGraph {
 		while ( (aux2 = suc.nextInt()) != null && aux2 >= 0 && ( aux2 < g1.graph.numNodes() ) ) try {
 		  WeightedArc arc = (WeightedArc)cons[0].newInstance(aux1,aux2, suc.label().getFloat());
 		  list.add(arc);
+		  if ( commit++ % COMMIT_SIZE == 0 ) { list.commit(); }
                 } catch ( Exception ex ) { throw new Error(ex); }
 	}
 	ArcLabelledNodeIterator it2 = g2.graph.nodeIterator();
@@ -289,6 +308,7 @@ public class Graph extends ArcLabelledImmutableGraph {
 		  if ( g1.nodes.get(aux2) != null && g1.nodes.get(aux2).equals(g2.nodes.get(aux2)) ) aaux2 = g1.nodesReverse.get(g2.nodes.get(aux2));
 		  WeightedArc arc = (WeightedArc)cons[0].newInstance(aux1, aux2, suc.label().getFloat());
 		  list.add(arc);
+		  if ( commit++ % COMMIT_SIZE == 0 ) { list.commit(); }
                 } catch ( Exception ex ) { throw new Error(ex); }
 	}
 	Graph result = new Graph(list.toArray(new WeightedArc[0]));
@@ -297,19 +317,21 @@ public class Graph extends ArcLabelledImmutableGraph {
 	for ( Integer n : g1.nodes.keySet() ) {
 		result.nodesReverse.put(g1.nodes.get(n) , n);
 		result.nodes.put(n , g1.nodes.get(n));
+		if ( commit++ % COMMIT_SIZE == 0 ) { result.commit(); }
 	}
 	for ( Integer n : g2.nodes.keySet() ) {
 		int nn = n + g1.numNodes();
 		if ( g1.nodes.get(n) != null && g1.nodes.get(n).equals(g2.nodes.get(n)) ) nn = g1.nodesReverse.get(g2.nodes.get(n));
 		result.nodesReverse.put(g2.nodes.get(n) , nn);
 		result.nodes.put(nn , g2.nodes.get(n));
+		if ( commit++ % COMMIT_SIZE == 0 ) { result.commit(); }
 	}
 	result.iterator = result.nodeIterator();
 	return result;
   }
 
   public Graph copy() {
-	Set<WeightedArc> list = new WeightedArcSet();
+	WeightedArcSet list = new WeightedArcSet();
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
         for ( int i = 0; i< cons.length; i++) cons[i].setAccessible(true);
 	ArcLabelledNodeIterator it = graph.nodeIterator();
@@ -318,6 +340,7 @@ public class Graph extends ArcLabelledImmutableGraph {
 		Integer aux2 = null;
 		ArcLabelledNodeIterator.LabelledArcIterator suc = it.successors();
 		while ( (aux2 = suc.nextInt()) != null && aux2 >= 0 && ( aux2 < graph.numNodes() ) ) try {
+		  if ( commit++ % COMMIT_SIZE == 0 ) { list.commit(); }
 		  WeightedArc arc = (WeightedArc)cons[0].newInstance(aux2, aux1, suc.label().getFloat());
 		  list.add(arc);
                 } catch ( Exception ex ) { throw new Error(ex); }
@@ -326,6 +349,7 @@ public class Graph extends ArcLabelledImmutableGraph {
 	result.nodes.clear();
 	result.nodesReverse.clear();
 	for ( Integer n : this.nodes.keySet() ) {
+		if ( commit++ % COMMIT_SIZE == 0 ) { result.commit(); }
 		result.nodesReverse.put(this.nodes.get(n) , n);
 		result.nodes.put(n , this.nodes.get(n));
 	}
@@ -395,9 +419,9 @@ public class Graph extends ArcLabelledImmutableGraph {
 
   public void setNode ( int nodeNum , String node ) { nodes.put(nodeNum,node); }
 
-  public NodeIterator nodeIterator() { return new ezgraph.NodeIterator(graph.nodeIterator(),reverse.nodeIterator());  }
+  public NodeIterator nodeIterator() { return new ezgraph.NodeIterator(this);  }
 
-  public NodeIterator nodeIterator(int from) { return new ezgraph.NodeIterator(graph.nodeIterator(), reverse.nodeIterator(), from); }
+  public NodeIterator nodeIterator(int from) { return new ezgraph.NodeIterator(this, from); }
 
   public long numArcs() { return numArcs; }
 
@@ -425,7 +449,7 @@ public class Graph extends ArcLabelledImmutableGraph {
 	} catch ( IOException ex ) { throw new Error(ex); }
 	nodes.clear();
 	nodesReverse.clear();
-	Set<WeightedArc> list1 = new WeightedArcSet();
+	WeightedArcSet list1 = new WeightedArcSet();
 	Int2IntAVLTreeMap map = new Int2IntAVLTreeMap();
 	IntSet set = new IntLinkedOpenHashSet();
 	int numIterators = 100;
@@ -454,6 +478,10 @@ public class Graph extends ArcLabelledImmutableGraph {
 		Integer aux2 = null;
 		ArcLabelledNodeIterator.LabelledArcIterator suc = it.successors();
 		while ( (aux2 = suc.nextInt()) != null && aux2 >= 0 && ( aux2 < graph.numNodes() ) ) try {
+		  if ( commit++ % COMMIT_SIZE == 0 ) {
+			try { nodes.getRecordManager().commit(); } catch ( IOException e ) { throw new Error(e); }
+			try { nodesReverse.getRecordManager().commit(); } catch ( IOException e ) { throw new Error(e); }		  
+		  }
 		  if ( !nodesReverse.containsKey(this.nodes.get(aux1)) ) {
 			  nodes.put(nodes.size(), this.nodes.get(aux1));
 		  	  nodesReverse.put(this.nodes.get(aux1), nodesReverse.size());
@@ -473,6 +501,10 @@ public class Graph extends ArcLabelledImmutableGraph {
                 } catch ( Exception ex ) { ex.printStackTrace(); throw new Error(ex); }
 		ArcLabelledNodeIterator.LabelledArcIterator anc = it.ancestors();
 		while ( (aux2 = anc.nextInt()) != null && aux2 >= 0 && ( aux2 < graph.numNodes() ) ) try {
+		  if ( commit++ % COMMIT_SIZE == 0 ) {
+			try { nodes.getRecordManager().commit(); } catch ( IOException e ) { throw new Error(e); }
+			try { nodesReverse.getRecordManager().commit(); } catch ( IOException e ) { throw new Error(e); }		  
+		  }
 		  if ( !nodesReverse.containsKey(this.nodes.get(aux1)) ) {
 			  nodes.put(nodes.size(), this.nodes.get(aux1));
 		  	  nodesReverse.put(this.nodes.get(aux1), nodesReverse.size());
@@ -505,5 +537,19 @@ public class Graph extends ArcLabelledImmutableGraph {
 
   public boolean randomAccess() { return true; }
 
-}
+  public void commit () { 
+	try { nodes.getRecordManager().commit(); } catch ( IOException e ) { throw new Error(e); }
+	try { nodesReverse.getRecordManager().commit(); } catch ( IOException e ) { throw new Error(e); }
+  };
 
+  protected void finalize () throws Throwable {
+	super.finalize();
+	nodes.clear();
+	nodes.getRecordManager().commit();
+	nodes.getRecordManager().close();
+	nodesReverse.clear();
+	nodesReverse.getRecordManager().commit();
+	nodesReverse.getRecordManager().close();
+  }
+
+}

@@ -13,10 +13,20 @@ public class NodeIterator extends ArcLabelledNodeIterator {
 
 	protected ArcLabelledNodeIterator it2;
 
-	public NodeIterator(ArcLabelledNodeIterator it1 , ArcLabelledNodeIterator it2, int n) { this.it1=it1; this.it2=it2; this.it1.skip(n); this.it2.skip(n); }
+	protected int current;
 
-	public NodeIterator(ArcLabelledNodeIterator it1 , ArcLabelledNodeIterator it2) { this.it1=it1; this.it2=it2; }
+	public NodeIterator ( Graph graph, int n ) {
+		this(graph);
+		it1.skip(n);
+		it2.skip(n);
+		current = n;		
+	}
 
+	public NodeIterator ( Graph graph ) {
+		it1 = graph.graph.nodeIterator();
+		it2 = graph.reverse.nodeIterator();
+		current = -1;
+	}
 
         public int degree() { return outdegree() + indegree(); }
 
@@ -65,6 +75,7 @@ public class NodeIterator extends ArcLabelledNodeIterator {
 		int i1 = it1.nextInt();
 		int i2 = it2.nextInt();
 		if ( i1 != i2 ) throw new Error("Problem with node iterator.");
+		current = i1;
 		return i1;
 	}
 
@@ -72,6 +83,7 @@ public class NodeIterator extends ArcLabelledNodeIterator {
 		Integer i1 = it1.next();
 		Integer i2 = it2.next();
 		if ( i1 != i2 ) throw new Error("Problem with node iterator.");
+		current = i1;
 		return i1;
 	}
 
@@ -79,7 +91,10 @@ public class NodeIterator extends ArcLabelledNodeIterator {
 		Integer i1 = it1.skip(n);
 		Integer i2 = it2.skip(n);
 		if ( i1 != i2 ) throw new Error("Problem with node iterator.");
+		current = i1;
 		return i1;
 	}
+
+	public int current ( ) { return current; }
 
 }
