@@ -240,6 +240,7 @@ public class UndirectedGraph extends Graph {
 	} catch ( IOException ex ) { throw new Error(ex); }
   }
 
+  public Graph transpose ( ) { return copy(); }
 
   public UndirectedGraph copy() {
         Constructor[] cons = WeightedArc.class.getDeclaredConstructors();
@@ -266,5 +267,7 @@ public class UndirectedGraph extends Graph {
 	}
 	return result;
   }
+
+  public boolean isConnected ( int x, int y ) { return isSuccessor(x,y); }
 
 }

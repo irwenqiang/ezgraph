@@ -20,6 +20,8 @@ public class PageRank {
  	public PageRank ( Graph graph, double threshold, int maxIter ) {
 		org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger("es.yrbcn.graph.weighted.WeightedPageRankPowerMethod");
 		logger.setLevel(org.apache.log4j.Level.FATAL);
+		logger = org.apache.log4j.Logger.getLogger("es.yrbcn.graph.weighted.WeightedPageRank");
+		logger.setLevel(org.apache.log4j.Level.FATAL);
 		this.graph = graph;
 		scores = new Int2DoubleOpenHashMap(graph.numNodes());
 		try {
@@ -30,6 +32,7 @@ public class PageRank {
 			else pr.stepUntil(WeightedPageRank.or( new WeightedPageRank.NormDeltaStoppingCriterion(0.0000000001), new WeightedPageRankPowerMethod.IterationNumberStoppingCriterion(1000)));
 			int pos = 0;
 			for ( double rank : pr.rank ) scores.put(pos++, rank);
+			pr.clear();
 		} catch ( IOException ex ) { throw new Error(ex); }
 	}
 

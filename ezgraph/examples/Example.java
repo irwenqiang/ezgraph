@@ -20,6 +20,9 @@ public class Example {
 		System.out.print("Computing PageRank on a Subgraph...");
 		PageRank pagerank2 = new PageRank(graph2);
 		System.out.println(" done.");
+		System.out.print("Computing PageRank on transpose graph...");
+		PageRank pagerank3 = new PageRank(graph.transpose());
+		System.out.println(" done.");
 		System.out.print("Computing HITS...");
 		HITS hits = new HITS(graph);
 		System.out.println(" done.");
@@ -62,6 +65,9 @@ public class Example {
 
 		System.out.println("Top 10 Nodes Sorted By PageRank");
 		for ( String node : pagerank.getSortedNodes().subList(0,Math.min(10,graph.numNodes()))) System.out.println(node + "\t" + pagerank.getPageRankScore(node));
+
+		System.out.println("Top 10 Nodes Sorted By PageRank on transpose");
+		for ( String node : pagerank.getSortedNodes().subList(0,Math.min(10,graph.numNodes()))) System.out.println(node + "\t" + pagerank3.getPageRankScore(node));
 
 		System.out.println("Top 10 Nodes Sorted By HITS Hub Score");
 		for ( String node : hits.getSortedHubNodes().subList(0,Math.min(10,graph.numNodes()))) System.out.println(node + "\t" + hits.getHubScore(node));

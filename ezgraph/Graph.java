@@ -10,6 +10,7 @@ import java.lang.reflect.*;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.*;
 import it.unimi.dsi.logging.ProgressLogger;
+
 import jdbm.*;
 
 public class Graph extends ArcLabelledImmutableGraph {
@@ -31,6 +32,8 @@ public class Graph extends ArcLabelledImmutableGraph {
   protected int numArcs;
 
   public Graph ( String file ) throws IOException {
+	org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger("it.unimi.dsi.webgraph.ImmutableGraph");
+	logger.setLevel(org.apache.log4j.Level.FATAL);
 	try {
 		File auxFile = File.createTempFile("graph-maps-" + System.currentTimeMillis(),"aux");
 		auxFile.deleteOnExit();
@@ -97,6 +100,8 @@ public class Graph extends ArcLabelledImmutableGraph {
   public Graph ( ArcLabelledImmutableGraph graph , String names[] ) { }
 
   public Graph ( WeightedBVGraph graph ) {
+	org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger("it.unimi.dsi.webgraph.ImmutableGraph");
+	logger.setLevel(org.apache.log4j.Level.FATAL);
 	try {
 		File auxFile = File.createTempFile("graph-maps-" + System.currentTimeMillis(),"aux");
 		auxFile.deleteOnExit();
@@ -138,6 +143,8 @@ public class Graph extends ArcLabelledImmutableGraph {
   }
 
   public Graph ( WeightedBVGraph graph, String[] names ) {
+	org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger("it.unimi.dsi.webgraph.ImmutableGraph");
+	logger.setLevel(org.apache.log4j.Level.FATAL);
 	if ( names.length != graph.numNodes() ) throw new Error("Problem with the list of names for the nodes in the graph.");
 	try {
 		File auxFile = File.createTempFile("graph-maps-" + System.currentTimeMillis(),"aux");
@@ -180,6 +187,8 @@ public class Graph extends ArcLabelledImmutableGraph {
   }
 
   public Graph ( BVGraph graph ) {
+	org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger("it.unimi.dsi.webgraph.ImmutableGraph");
+	logger.setLevel(org.apache.log4j.Level.FATAL);
 	try {
 		File auxFile = File.createTempFile("graph-maps-" + System.currentTimeMillis(),"aux");
 		auxFile.deleteOnExit();
@@ -230,6 +239,8 @@ public class Graph extends ArcLabelledImmutableGraph {
   }
 
   public Graph ( BVGraph graph, String[] names ) {
+	org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger("it.unimi.dsi.webgraph.ImmutableGraph");
+	logger.setLevel(org.apache.log4j.Level.FATAL);
 	if ( names.length != graph.numNodes() ) throw new Error("Problem with the list of names for the nodes in the graph.");
 	try {
 		File auxFile = File.createTempFile("graph-maps-" + System.currentTimeMillis(),"aux");
@@ -356,6 +367,15 @@ public class Graph extends ArcLabelledImmutableGraph {
 	return result;
   }
 
+  public Graph transpose ( ) {
+	Graph g = copy();
+	try {
+		g.graph = Transform.transposeOffline(g.graph,1000);
+		g.reverse = Transform.transposeOffline(g.reverse,1000);
+	} catch ( IOException ex ) { throw new Error(ex); }
+	return g;
+  }
+
   protected void store ( CharSequence basename ) throws java.io.IOException {
 	BVGraph.store( graph, basename + ArcLabelledImmutableGraph.UNDERLYINGGRAPH_SUFFIX);
 	BitStreamArcLabelledImmutableGraph.store( graph, basename, basename + ArcLabelledImmutableGraph.UNDERLYINGGRAPH_SUFFIX );
@@ -386,6 +406,21 @@ public class Graph extends ArcLabelledImmutableGraph {
 	while ( (aux = iterator.nextInt()) != x ) {  }
 	return iterator;
   }
+
+  public float weight ( int x, int y ) {
+	ArcLabelledNodeIterator.LabelledArcIterator suc = successors(x);
+	Integer aux;
+	while ( (aux = suc.nextInt()) != null && aux >= 0 && ( aux < numNodes() ) ) try {
+		if ( aux == y ) return suc.label().getFloat();
+        } catch ( Exception ex ) { throw new Error(ex); }
+	return (float)(0.0);
+  }
+
+  public boolean isSuccessor ( int x, int y ) { for ( int i : successorArray(x) ) if ( i == y ) return true; return false; }
+
+  public boolean isAncestor ( int x, int y ) { for ( int i : ancestorArray(x) ) if ( i == y ) return true; return false; }
+
+  public boolean isConnected ( int x, int y ) { return isSuccessor(x,y) || isAncestor(x,y); }
 
   public int degree( int x ) { NodeIterator iterator = advanceIterator(x); return iterator.degree(); }
 
